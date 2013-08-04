@@ -4,7 +4,7 @@ import java.util.concurrent.RecursiveTask;
 public class MatrixMultiplier extends RecursiveTask<double[][]> {
    private double[][] a, b, c;
    private int rStart, rEnd, cStart, cEnd, n;
-   public static final int numRowsToComputeSingle = 1;
+   public static int numRowsToComputeSingle = 8;
 
    public MatrixMultiplier(double[][] a, double[][] b) {
       if (a.length != b.length 
@@ -41,7 +41,7 @@ public class MatrixMultiplier extends RecursiveTask<double[][]> {
    }
 
    protected double[][] compute() {
-      if (rEnd - rStart == 1)
+      if (rEnd - rStart <= numRowsToComputeSingle)
          return computeDirectly();
 
       // recursive call 1 will take the upper half of the left
@@ -111,24 +111,22 @@ public class MatrixMultiplier extends RecursiveTask<double[][]> {
    }
 
    public static void main(String[] args) throws Exception {
-      int rows1, rows2, cols2;
-      if (args.length < 3) {
-         rows1 = rows2 = cols2 = 2;
+      int dim;
+      if (args.length == 0) {
+         dim = 4;
       } else {
-         rows1 = Integer.parseInt(args[0]);
-         rows2 = Integer.parseInt(args[1]);
-         cols2 = Integer.parseInt(args[2]);
+         dim = Integer.parseInt(args[0]);
       }
-      double[][] a = new double[rows1][rows2];
-      double[][] b = new double[rows2][cols2];
+      double[][] a = new double[dim][dim];
+      double[][] b = new double[dim][dim];
       double counter = 1.0;
-      for (int i = 0; i < rows1; ++i) {
-         for (int j = 0; j < rows2; ++j) {
+      for (int i = 0; i < dim; ++i) {
+         for (int j = 0; j < dim; ++j) {
             a[i][j] = counter++;
          }
       }
-      for (int i = 0; i < rows2; ++i) {
-         for (int j = 0; j < cols2; ++j) {
+      for (int i = 0; i < dim; ++i) {
+         for (int j = 0; j < dim; ++j) {
             b[i][j] = counter++;
          }
       }
@@ -138,7 +136,7 @@ public class MatrixMultiplier extends RecursiveTask<double[][]> {
       MatrixMultiplier mm = new MatrixMultiplier(a,b);
       fjp.invoke(mm);
       long rEndTime = System.currentTimeMillis();
-      if (rows1 < 6 && rows2 < 6 && cols2 < 6)
+      if (dim < 6)
          System.out.print(mm);
       System.out.printf("Java: It took %f seconds to calculate.\n", 
                               (double)(rEndTime - rStartTime) / 1000);
