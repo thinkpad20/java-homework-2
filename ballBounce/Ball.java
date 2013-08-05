@@ -31,7 +31,7 @@ public class Ball {
       y = R.nextDouble() * BounceFrame.DEFAULT_HEIGHT;
       dx = R.nextDouble();
       dy = R.nextDouble();
-      this.color = R.nextInt() % 2 == 0 ? Color.RED : Color.BLUE;
+      this.color = R.nextInt() % 4 == 0 ? Color.RED : Color.BLUE;
       int sizeChoice = R.nextInt() % 7;
       if (sizeChoice == 0) { setSize(Size.LARGE); } 
       else if (sizeChoice < 3) { setSize(Size.MEDIUM); } 
@@ -41,7 +41,8 @@ public class Ball {
    public void move(Rectangle2D bounds) {
       x += dx;
       y += dy;
-      // escape hatch is when x - 
+      // escape hatch in upper left corner
+      if (x - getRadius() < bounds.getMaxX())
       if (x - getRadius() <= bounds.getMinX()) {
          x = bounds.getMinX() + getRadius();
          dx = -dx;
