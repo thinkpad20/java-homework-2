@@ -2,35 +2,23 @@ package ballBounce;
 
 public class BallComponentRunnable implements Runnable {
 	private BallComponent ballc;
-	public static final int STEPS = 1000;
 	public static final int DELAY = 5;
-	public static int nStepsRemaining = STEPS;
-	private BounceFrame bfParent;
+	private BounceFrame parent;
 
-	public BallComponentRunnable(BallComponent ballc, BounceFrame bfParent) {
+	public BallComponentRunnable(BallComponent ballc, BounceFrame parent) {
 		this.ballc = ballc;
-		this.bfParent = bfParent;
+		this.parent = parent;
 	}
 
 	public void run() {
 		try {
-			for (int i = 1; i <= STEPS; i++) {
+			while (true) {
 				ballc.move();
 				ballc.repaint();
 				ballc.detectCollisions();
 				Thread.sleep(DELAY);
-				nStepsRemaining--;
-				bfParent.updateCount(nStepsRemaining);
 			}
 		} catch (InterruptedException e) {}
-	}
-
-	public int getStepsRemaining() {
-		return nStepsRemaining;
-	}
-
-	public void resetStepsRemaining() {
-		nStepsRemaining = STEPS;
 	}
 
 }

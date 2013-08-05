@@ -16,14 +16,13 @@ import javax.swing.event.ChangeListener;
 class BounceFrame extends JFrame implements ChangeListener {
    private boolean isRunning = false;
    private Thread t;
-   private JLabel lblStepsRemaining;
-   private JLabel lblStepsRemainingCount;
    BallComponentRunnable bcr;
    private JSlider ballSizeSlider;
    private BallComponent comp;
-   public static final int DEFAULT_WIDTH = 450;
-   public static final int DEFAULT_HEIGHT = 350;
-   public static final int STEPS = 1000;
+   public static final int DEFAULT_WIDTH = 400;
+   public static final int DEFAULT_HEIGHT = 300;
+   static final int ESCAPE_HATCH_X = DEFAULT_WIDTH / 10;
+   static final int ESCAPE_HATCH_Y = DEFAULT_HEIGHT / 10;
    public static final int DELAY = 3;
 
    public BounceFrame() {
@@ -33,14 +32,6 @@ class BounceFrame extends JFrame implements ChangeListener {
       bcr = new BallComponentRunnable(comp, this);
       t = new Thread(bcr);
       add(comp, BorderLayout.CENTER);
-
-      JPanel upperPanel = new JPanel();
-      lblStepsRemaining = new JLabel("Steps remaining: ");
-      lblStepsRemainingCount = new JLabel(String.valueOf(bcr.getStepsRemaining()));
-      upperPanel.add(lblStepsRemaining);
-      upperPanel.add(lblStepsRemainingCount);
-
-      add(upperPanel, BorderLayout.NORTH);
 
       JPanel buttonPanel = new JPanel();
       addButton(buttonPanel, "Start", new ActionListener() {
@@ -80,15 +71,6 @@ class BounceFrame extends JFrame implements ChangeListener {
       if (!isRunning) {
          t.start();
          isRunning = true;
-      }
-   }
-
-   public void updateCount(int count) {
-      lblStepsRemainingCount.setText(String.valueOf(count));
-      if (count == 0) {
-         t = new Thread(bcr);
-         isRunning = false;
-         bcr.resetStepsRemaining();
       }
    }
 
