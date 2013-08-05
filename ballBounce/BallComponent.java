@@ -27,7 +27,7 @@ class BallComponent extends JComponent {
          for (int j=i+1; j<balls.size(); j++) {
             Ball ball1 = balls.get(i), ball2 = balls.get(j);
             if (isCollision(ball1, ball2)) {
-               if (ball1.getCollisionTimer() > 50 && ball2.getCollisionTimer() > 50) {
+               if (ball1.getCollisionTimer() > 5 && ball2.getCollisionTimer() > 5) {
                   handleCollision(ball1, ball2);
                   ball1.resetCollisionTimer();
                   ball2.resetCollisionTimer();

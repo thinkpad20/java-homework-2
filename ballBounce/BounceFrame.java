@@ -19,8 +19,8 @@ class BounceFrame extends JFrame implements ChangeListener {
    BallComponentRunnable bcr;
    private JSlider ballSizeSlider;
    private BallComponent comp;
-   public static final int DEFAULT_WIDTH = 400;
-   public static final int DEFAULT_HEIGHT = 300;
+   public static final int DEFAULT_WIDTH = 800;
+   public static final int DEFAULT_HEIGHT = 600;
    static final int ESCAPE_HATCH_X = DEFAULT_WIDTH / 10;
    static final int ESCAPE_HATCH_Y = DEFAULT_HEIGHT / 10;
    public static final int DELAY = 3;
