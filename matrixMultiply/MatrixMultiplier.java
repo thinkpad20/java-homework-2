@@ -75,13 +75,6 @@ public class MatrixMultiplier extends RecursiveTask<double[][]> {
           cStart4 = cStart2,
           cEnd4 = cEnd2;
 
-      // System.out.printf("(%d,%d,%d,%d) -> (%d,%d,%d,%d), (%d,%d,%d,%d), (%d,%d,%d,%d), (%d,%d,%d,%d)\n", 
-      //                   rStart, rEnd, cStart, cEnd,
-      //                   rStart1, rEnd1, cStart1, cEnd1,
-      //                   rStart2, rEnd2, cStart2, cEnd2,
-      //                   rStart3, rEnd3, cStart3, cEnd3,
-      //                   rStart4, rEnd4, cStart4, cEnd4);
-
       MatrixMultiplier mm1 = new MatrixMultiplier(a, b, c, rStart1, rEnd1, cStart1, cEnd1);
       MatrixMultiplier mm2 = new MatrixMultiplier(a, b, c, rStart2, rEnd2, cStart2, cEnd2);
       MatrixMultiplier mm3 = new MatrixMultiplier(a, b, c, rStart3, rEnd3, cStart3, cEnd3);
@@ -115,38 +108,6 @@ public class MatrixMultiplier extends RecursiveTask<double[][]> {
       }
       return buf.toString();
    }
-
-   // public static void main(String[] args) throws Exception {
-   //    int dim;
-   //    if (args.length == 0) {
-   //       dim = 4;
-   //    } else {
-   //       dim = Integer.parseInt(args[0]);
-   //    }
-   //    double[][] a = new double[dim][dim];
-   //    double[][] b = new double[dim][dim];
-   //    double counter = 1.0;
-   //    for (int i = 0; i < dim; ++i) {
-   //       for (int j = 0; j < dim; ++j) {
-   //          a[i][j] = counter++;
-   //       }
-   //    }
-   //    for (int i = 0; i < dim; ++i) {
-   //       for (int j = 0; j < dim; ++j) {
-   //          b[i][j] = counter++;
-   //       }
-   //    }
-   //    double[][] c = new double[a.length][b[0].length];
-   //    ForkJoinPool fjp = new ForkJoinPool();
-   //    long rStartTime = System.currentTimeMillis();
-   //    MatrixMultiplier mm = new MatrixMultiplier(a,b);
-   //    fjp.invoke(mm);
-   //    long rEndTime = System.currentTimeMillis();
-   //    if (dim < 6)
-   //       System.out.print(mm);
-   //    System.out.printf("Java: It took %f seconds to calculate.\n", 
-   //                            (double)(rEndTime - rStartTime) / 1000);
-   // }
 
    public static void main(String[] args) {
       BufferedReader br = null;
