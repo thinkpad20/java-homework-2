@@ -23,6 +23,11 @@ public class Ball {
       this();
       setColor(color);
       setSize(size);
+      if (color == Color.RED) {
+         BallComponent.incRed();
+      } else {
+         BallComponent.incBlue();
+      }
    }
 
    public Ball() {
@@ -31,19 +36,29 @@ public class Ball {
       y = R.nextDouble() * BounceFrame.DEFAULT_HEIGHT;
       dx = R.nextDouble();
       dy = R.nextDouble();
-      this.color = R.nextInt() % 4 == 0 ? Color.RED : Color.BLUE;
+      if (R.nextInt() % 3 == 0) {
+         color = Color.RED;
+         BallComponent.incRed();
+      } else {
+         color = Color.BLUE;
+         BallComponent.incBlue();
+      }
       int sizeChoice = R.nextInt() % 7;
       if (sizeChoice == 0) { setSize(Size.LARGE); } 
       else if (sizeChoice < 3) { setSize(Size.MEDIUM); } 
       else { setSize(Size.SMALL); }
    }
 
-   public void move(Rectangle2D bounds) {
+   public void move(BallComponent comp) {
       x += dx;
       y += dy;
+      Rectangle2D bounds = comp.getBounds();
       // escape hatch in upper left corner
-      if (x - getRadius() < bounds.getMaxX())
       if (x - getRadius() <= bounds.getMinX()) {
+         if (y < bounds.getMinY() + BounceFrame.ESCAPE_HATCH_Y) {
+            comp.remove(this);
+            return;
+         }
          x = bounds.getMinX() + getRadius();
          dx = -dx;
       }
@@ -52,6 +67,10 @@ public class Ball {
          dx = -dx;
       }
       if (y - getRadius() <= bounds.getMinY()) {
+         if (x < bounds.getMinX() + BounceFrame.ESCAPE_HATCH_X) {
+            comp.remove(this);
+            return;
+         }
          y = bounds.getMinY() + getRadius();
          dy = -dy;
       }
@@ -90,7 +109,10 @@ public class Ball {
    public void setDX(double dx) { this.dx = dx; }
    public void setDY(double dy) { this.dy = dy; }
    public double getMass() {
-      return radius * radius * radius * 4 / 3;
+      if (color == Color.RED)
+         return radius * radius * radius * 8 / 3;
+      else
+         return radius * radius * radius * 4 / 3;
    }
    public void resetCollisionTimer() { collisionTimer = 0; }
    public void incrementCollisionTimer() { collisionTimer++; }

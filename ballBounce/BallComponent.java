@@ -10,31 +10,84 @@ import java.awt.Color;
 import javax.swing.JComponent;
 
 class BallComponent extends JComponent {
-   private ArrayList<Ball> balls = new ArrayList<Ball>();
-
-   public void add(Ball b) { balls.add(b); }
-
-   public void paintComponent(Graphics g) {
-      Graphics2D g2 = (Graphics2D) g;
-      for (Ball b : balls) {
-         g2.setPaint(b.getColor());
-         g2.fill(b.getShape());
+   public static ArrayList<Ball> balls = new ArrayList<Ball>();
+   public static int numRed = 0, numBlue = 0;
+   public boolean isPaused;
+   private BounceFrame bf;
+   public BallComponent(BounceFrame frame) { bf = frame; }
+   public synchronized void add(Ball b) {
+      if (b.getColor() == Color.RED)
+         numRed++;
+      else
+         numBlue++;
+      balls.add(b);
+      if (getNBalls() % BounceFrame.NUM_BALLS_PER_THREAD == 0) {
+         bf.addThread(getNBalls());
       }
    }
 
+   public synchronized int getNBalls() { 
+      return balls.size();
+   }
+
+   public synchronized void remove(Ball b) { 
+      if (balls.contains(b)) {
+         if (b.getColor() == Color.RED)
+            decRed();
+         else
+            decBlue();
+         balls.remove(b); 
+      }
+   }
+
+   public static synchronized void incRed() { numRed++; }
+   public static synchronized void incBlue() { numBlue++; }
+   public static synchronized void decRed() { numRed--; }
+   public static synchronized void decBlue() { numBlue--; }
+   public int getRed() { return numRed; }
+   public int getBlue() { return numBlue; }
+   public synchronized void pause() {
+      isPaused = (isPaused) ? false : true;
+      if (!isPaused) notifyAll();
+   }
+   public synchronized boolean isPaused() {
+      while (isPaused) {
+         try {wait();} catch (Exception e) {}
+      }
+      return isPaused;
+   }
+
+   public void paintComponent(Graphics g) {
+      try {
+         Graphics2D g2 = (Graphics2D) g;
+         for (Ball b : balls) {
+            if (b != null) {
+               g2.setPaint(b.getColor());
+               g2.fill(b.getShape());
+            }
+         }
+      } catch (Exception e) {}
+   }
+
+   public ArrayList<Ball> getBalls() { return balls; }
+
    public void detectCollisions() {
-      for (int i=0; i<balls.size()-1; i++) {
-         for (int j=i+1; j<balls.size(); j++) {
-            Ball ball1 = balls.get(i), ball2 = balls.get(j);
-            if (isCollision(ball1, ball2)) {
-               if (ball1.getCollisionTimer() > 1 && ball2.getCollisionTimer() > 1) {
-                  handleCollision(ball1, ball2);
-                  ball1.resetCollisionTimer();
-                  ball2.resetCollisionTimer();
+      if (isPaused()) return;
+      try {
+         for (int i=0; i<balls.size()-1; i++) {
+            for (int j=i+1; j<balls.size(); j++) {
+               Ball ball1 = balls.get(i), ball2 = balls.get(j);
+               if (ball1.getCollisionTimer() > 30 && ball2.getCollisionTimer() > 30) {
+                  if (isCollision(ball1, ball2)) {
+                     handleCollision(ball1, ball2);
+                     ball1.resetCollisionTimer();
+                     ball2.resetCollisionTimer();
+                  }
                }
             }
          }
       }
+      catch (Exception e) {}
    }
 
    private boolean isCollision(Ball ball1, Ball ball2) {
@@ -46,9 +99,11 @@ class BallComponent extends JComponent {
 
       double distanceSquared = (x2-x1) * (x2-x1) + (y2-y1) * (y2-y1);
 
-      return distanceSquared <= 4*r1*r2;
+      return distanceSquared <= (r1+r2) * (r1+r2);
    }
 
+   // the code for bounce was adapted from this code:
+   // http://www.emanueleferonato.com/2007/08/19/managing-ball-vs-ball-collision-with-flash
    private void bounce(Ball ball1, Ball ball2) {
       double xDist = ball1.getX()-ball2.getX(),
              yDist = ball1.getY()-ball2.getY(),
@@ -79,32 +134,24 @@ class BallComponent extends JComponent {
 
    private void handleCollision(Ball ball1, Ball ball2) {
       if (ball1.getColor() == ball2.getColor()) {
-         if (ball1.getSize() == ball2.getSize())
+         // Commenting this line out because it's much more fun with more bouncing! :)
+         // if (ball1.getSize() == ball2.getSize())
             bounce(ball1, ball2);
-      // } else {
-      //    System.out.println("ball " + ball1.num + " and " + ball2.num + " have collided!");
-      //    add(new Ball(Color.RED, Ball.Size.SMALL));
       } else {
          if (ball1.getSize() != ball2.getSize()) {
             Ball smallerBall = ball1.getRadius() < ball2.getRadius() ? ball1 : ball2;
-            balls.remove(smallerBall);
+            remove(smallerBall);
          }
          else if (ball1.getSize() == Ball.Size.SMALL) {
             add(new Ball(Color.RED, Ball.Size.SMALL));
          } else if (ball1.getSize() == Ball.Size.MEDIUM) {
             add(new Ball(Color.RED, Ball.Size.SMALL));
-            add(new Ball(Color.RED, Ball.Size.MEDIUM));
+            add(new Ball(Color.RED, Ball.Size.SMALL));
          } else if (ball1.getSize() == Ball.Size.LARGE) {
             add(new Ball(Color.RED, Ball.Size.SMALL));
             add(new Ball(Color.RED, Ball.Size.SMALL));
             add(new Ball(Color.BLUE, Ball.Size.MEDIUM));
          }
-      }
-   }
-
-   public void move() {
-      for (Ball b : balls) {
-         b.move(getBounds());
       }
    }
 

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,42 +14,44 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-class BounceFrame extends JFrame implements ChangeListener {
+class BounceFrame extends JFrame {
    private boolean isRunning = false;
-   private Thread t;
-   BallComponentRunnable bcr;
+   private ArrayList<Thread> threads;
    private JSlider ballSizeSlider;
    private BallComponent comp;
    public static final int DEFAULT_WIDTH = 800;
    public static final int DEFAULT_HEIGHT = 600;
-   static final int ESCAPE_HATCH_X = DEFAULT_WIDTH / 10;
-   static final int ESCAPE_HATCH_Y = DEFAULT_HEIGHT / 10;
+   public static final int ESCAPE_HATCH_X = DEFAULT_WIDTH / 10;
+   public static final int ESCAPE_HATCH_Y = DEFAULT_HEIGHT / 10;
    public static final int DELAY = 3;
+   public static final int NUM_BALLS_PER_THREAD = 8;
 
    public BounceFrame() {
       setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
       setTitle("BounceThread");
-      comp = new BallComponent();
-      bcr = new BallComponentRunnable(comp, this);
-      t = new Thread(bcr);
+      comp = new BallComponent(this);
+      threads = new ArrayList<Thread>();
+      threads.add(new Thread(new BallThread(comp, this, 0)));
       add(comp, BorderLayout.CENTER);
 
       JPanel buttonPanel = new JPanel();
-      addButton(buttonPanel, "Start", new ActionListener() {
+      addButton(buttonPanel, "Add Ball", new ActionListener() {
          public void actionPerformed(ActionEvent event) {
             addBall();
          }
       });
 
-      addButton(buttonPanel, "Close", new ActionListener() {
+      addButton(buttonPanel, "Pause/Resume", new ActionListener() {
+         public void actionPerformed(ActionEvent event) {
+            comp.pause();
+         }
+      });
+
+      addButton(buttonPanel, "Quit", new ActionListener() {
          public void actionPerformed(ActionEvent event) {
             System.exit(0);
          }
       });
-
-      ballSizeSlider = new JSlider(1, 50, 10);
-      ballSizeSlider.addChangeListener(this);
-      buttonPanel.add(ballSizeSlider);
 
       add(buttonPanel, BorderLayout.SOUTH);
    }
@@ -65,16 +68,18 @@ class BounceFrame extends JFrame implements ChangeListener {
       c.add(slider);
    }
 
-   public void addBall() {
-      Ball b = new Ball();
-      comp.add(b);
+   public synchronized void addThread(int start) {
+      Thread t = new Thread(new BallThread(comp, this, start));
+      t.start();
+      threads.add(t);
+   }
+
+   public synchronized void addBall() {
+      comp.add(new Ball());
       if (!isRunning) {
-         t.start();
+         threads.get(0).start();
          isRunning = true;
       }
    }
 
-   public void stateChanged(ChangeEvent e) {
-      comp.setRadius(ballSizeSlider.getValue());
-   }
 }
